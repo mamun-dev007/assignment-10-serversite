@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,6 +27,28 @@ async function run() {
 
     const db = client.db("habitTrackerDB");
     const habitsCollection = db.collection("habits");
+
+
+
+
+app.post("/api/jwt", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+ 
+app.post('/token', (req, res) =>{
+  const token = jwt.sign({ email:'abc' },process.env.JWT_SECRET, { expiresIn: "2h" });
+  res.send({ token:token });
+})
+})
+
+  
+
+
+
+
 
     app.post("/api/habits", async (req, res) => {
       const habit = req.body;
