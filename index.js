@@ -6,16 +6,18 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+require('dotenv').config();
+ 
+const uri = process.env.MONGO_URI;
 
-const uri = `mongodb+srv://Habit-Tracker:03nmHoAZBuigvseY@cluster0.6dcy7ej.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
-    strict: true,
+    strict: true, 
     deprecationErrors: true,
   },
-});
+}); 
 
 async function run() {
   try {
@@ -97,47 +99,6 @@ app.get("/api/habits/:id", async (req, res) => {
   }
 });
 
-app.patch("/api/habits/complete/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const today = new Date().toISOString().split("T")[0]; 
-
-    const habit = await habitsCollection.findOne({ _id: new ObjectId(id) });
-    if (!habit) return res.status(404).send({ message: "Habit not found" });
-
-    if (habit.completionHistory?.includes(today)) {
-      return res.status(400).send({ message: "Already completed today" });
-    }
-
-    const updated = await habitsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $push: { completionHistory: today } }
-    );
-
-    const newHistory = [...(habit.completionHistory || []), today];
-    newHistory.sort();
-    let streak = 1;
-
-    for (let i = newHistory.length - 2; i >= 0; i--) {
-      const prev = new Date(newHistory[i]);
-      const curr = new Date(newHistory[i + 1]);
-      const diffDays = (curr - prev) / (1000 * 60 * 60 * 24);
-      if (diffDays === 1) streak++;
-      else break;
-    }
-
-    await habitsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { streak } }
-    );
-
-    res.send({ message: "Marked complete", streak, updated });
-  } catch (err) {
-    console.error("Mark Complete Error:", err);
-    res.status(500).send({ message: "Failed to mark complete", error: err.message });
-  }
-});
-
 app.get("/api/featured-habits", async (req, res) => {
   try {
     const habits = await habitsCollection
@@ -148,7 +109,7 @@ app.get("/api/featured-habits", async (req, res) => {
     console.error(" Error fetching featured habits:", error);
     res.status(500).send({ message: "Failed to load featured habits" });
   }
-});
+}); 
 
 
 app.put("/api/habits/:id", async (req, res) => {
