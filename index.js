@@ -5,9 +5,9 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
+require('dotenv').config();
 app.use(cors());
 app.use(express.json());
-require('dotenv').config();
  
 const uri = process.env.MONGO_URI;
 
@@ -20,35 +20,19 @@ const client = new MongoClient(uri, {
   },
 }); 
 
+ 
+app.get('/', (req, res) => {
+  res.send(" Habit Tracker Server is Running");
+});
+
 async function run() {
   try {
     await client.connect();
-    console.log(" MongoDB connected successfully!");
 
+    
     const db = client.db("habitTrackerDB");
     const habitsCollection = db.collection("habits");
-
-
-
-
-app.post("/api/jwt", async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: "Email is required" });
-  }
- 
-app.post('/token', (req, res) =>{
-  const token = jwt.sign({ email:'abc' },process.env.JWT_SECRET, { expiresIn: "2h" });
-  res.send({ token:token });
-})
-})
-
-  
-
-
-
-
+    
 
     app.post("/api/habits", async (req, res) => {
       const habit = req.body;
@@ -89,15 +73,6 @@ app.post('/token', (req, res) =>{
   }
 });
 
-    app.put("/api/habits/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedData = req.body;
-      const result = await habitsCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedData }
-      );
-      res.send(result);
-    });
 
     app.patch("/api/habits/complete/:id", async (req, res) => {
       const id = req.params.id;
@@ -151,19 +126,11 @@ app.put("/api/habits/:id", async (req, res) => {
 });
 
 
+ 
+ 
 
 
-
-
-
-
-
-
-
-    app.get("/", (req, res) => {
-      res.send("Habit Tracker Server is Running ");
-    });
-  } catch (error) {
+  } catch (error) { 
     console.error(" Error connecting to MongoDB:", error);
   }
 }
